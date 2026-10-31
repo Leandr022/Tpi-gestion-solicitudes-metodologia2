@@ -186,6 +186,7 @@ class Solicitud:
 
     @classmethod
     def nueva(cls, id, datos, fecha_alta):
+        """Crea una solicitud pendiente. Precondición: `datos.validar()` ya se ejecutó sin errores."""
         tipo = Tipo(datos.tipo)
         prioridad = Prioridad(datos.prioridad)
         plazo = cls.calcular_plazo_en_dias(tipo, prioridad)
