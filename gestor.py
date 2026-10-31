@@ -5,253 +5,308 @@ import datetime
 
 from modelos import Estudiante, Responsable, Solicitud
 
-RUTA = "datos.json"
+RUTA_DATOS = "datos.json"
+FORMATO_FECHA = "%Y-%m-%d"
+PATRON_EMAIL = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+MENSAJE_FECHA_INVALIDA = "ERROR: fecha inválida (use AAAA-MM-DD)"
+
+LARGO_MINIMO_DESCRIPCION = 10
+LARGO_MAXIMO_DESCRIPCION = 200
+MAX_SOLICITUDES_ACTIVAS = 3
+
+TIPOS_VALIDOS = ["CERTIFICADO", "EQUIVALENCIA", "REINCORPORACION", "CONSULTA"]
+PRIORIDADES_VALIDAS = ["ALTA", "MEDIA", "BAJA"]
+PRIORIDAD_ALTA = "ALTA"
+PRIORIDAD_BAJA = "BAJA"
+
+PENDIENTE = "PENDIENTE"
+EN_PROCESO = "EN_PROCESO"
+RESUELTA = "RESUELTA"
+RECHAZADA = "RECHAZADA"
+CERRADA = "CERRADA"
+ESTADOS_VALIDOS = [PENDIENTE, EN_PROCESO, RESUELTA, RECHAZADA, CERRADA]
+ESTADOS_ACTIVOS = [PENDIENTE, EN_PROCESO]
+ESTADOS_NO_ASIGNABLES = [RESUELTA, RECHAZADA, CERRADA]
+TRANSICIONES_PERMITIDAS = {
+    PENDIENTE: [EN_PROCESO, RECHAZADA],
+    EN_PROCESO: [RESUELTA, RECHAZADA],
+    RESUELTA: [CERRADA],
+}
+
+PLAZO_BASE_EN_DIAS = {"CERTIFICADO": 5, "EQUIVALENCIA": 15, "REINCORPORACION": 10, "CONSULTA": 3}
+DIVISOR_PLAZO_PRIORIDAD_ALTA = 2
+DIAS_ADICIONALES_PRIORIDAD_BAJA = 5
 
 
 class GestorSolicitudes:
 
+    # ------------------------------------------------------------------
+    # Persistencia
+    # ------------------------------------------------------------------
     def cargar(self):
         vacio = {"ultimo_id": 0, "ultimo_resp": 0, "estudiantes": [], "responsables": [], "solicitudes": []}
-        if not os.path.exists(RUTA):
+        if not os.path.exists(RUTA_DATOS):
             return vacio
-        f = open(RUTA, "r", encoding="utf-8")
+        archivo = open(RUTA_DATOS, "r", encoding="utf-8")
         try:
-            d = json.load(f)
+            datos = json.load(archivo)
         except:
-            d = vacio
-        f.close()
-        d["estudiantes"] = [Estudiante(x["legajo"], x["nombre"], x["email"]) for x in d["estudiantes"]]
-        d["responsables"] = [Responsable(x["id"], x["nombre"], x["area"]) for x in d["responsables"]]
-        d["solicitudes"] = [Solicitud(x["id"], x["legajo"], x["tipo"], x["prioridad"], x["estado"], x["descripcion"], x["fecha"], x["vence"], x["responsable_id"]) for x in d["solicitudes"]]
-        return d
+            datos = vacio
+        archivo.close()
+        datos["estudiantes"] = [Estudiante(e["legajo"], e["nombre"], e["email"]) for e in datos["estudiantes"]]
+        datos["responsables"] = [Responsable(r["id"], r["nombre"], r["area"]) for r in datos["responsables"]]
+        datos["solicitudes"] = [
+            Solicitud(s["id"], s["legajo"], s["tipo"], s["prioridad"], s["estado"], s["descripcion"],
+                      s["fecha"], s["vence"], s["responsable_id"])
+            for s in datos["solicitudes"]
+        ]
+        return datos
 
-    def guardar(self, d):
-        out = {
-            "ultimo_id": d["ultimo_id"],
-            "ultimo_resp": d["ultimo_resp"],
-            "estudiantes": [e.__dict__ for e in d["estudiantes"]],
-            "responsables": [r.__dict__ for r in d["responsables"]],
-            "solicitudes": [s.__dict__ for s in d["solicitudes"]],
+    def guardar(self, datos):
+        salida = {
+            "ultimo_id": datos["ultimo_id"],
+            "ultimo_resp": datos["ultimo_resp"],
+            "estudiantes": [e.__dict__ for e in datos["estudiantes"]],
+            "responsables": [r.__dict__ for r in datos["responsables"]],
+            "solicitudes": [s.__dict__ for s in datos["solicitudes"]],
         }
-        f = open(RUTA, "w", encoding="utf-8")
-        f.write(json.dumps(out, indent=2, ensure_ascii=False))
-        f.close()
+        archivo = open(RUTA_DATOS, "w", encoding="utf-8")
+        archivo.write(json.dumps(salida, indent=2, ensure_ascii=False))
+        archivo.close()
+
+    # ------------------------------------------------------------------
+    # Consultas auxiliares (antes duplicadas en cada operación)
+    # ------------------------------------------------------------------
+    def _buscar_solicitud(self, datos, id_solicitud):
+        encontrada = None
+        for solicitud in datos["solicitudes"]:
+            if solicitud.id == id_solicitud:
+                encontrada = solicitud
+        return encontrada
+
+    def _buscar_responsable(self, datos, id_responsable):
+        encontrado = None
+        for responsable in datos["responsables"]:
+            if responsable.id == id_responsable:
+                encontrado = responsable
+        return encontrado
+
+    def _buscar_estudiante(self, datos, legajo):
+        encontrado = None
+        for estudiante in datos["estudiantes"]:
+            if estudiante.legajo == legajo:
+                encontrado = estudiante
+        return encontrado
+
+    def _resolver_fecha(self, texto):
+        """Devuelve la fecha indicada, la fecha actual si no se indicó, o None si es inválida."""
+        if texto is None:
+            return datetime.date.today()
+        try:
+            return datetime.datetime.strptime(texto, FORMATO_FECHA).date()
+        except ValueError:
+            return None
+
+    # ------------------------------------------------------------------
+    # Registrar solicitud
+    # ------------------------------------------------------------------
+    def _validar_datos_de_registro(self, legajo, nombre, email, tipo, prioridad, descripcion):
+        """Devuelve el mensaje de error de la primera regla incumplida, o None si todo es válido."""
+        if legajo is None or legajo == "" or not legajo.isdigit():
+            return "ERROR: legajo inválido"
+        if nombre is None or nombre.strip() == "":
+            return "ERROR: nombre obligatorio"
+        if not re.match(PATRON_EMAIL, email):
+            return "ERROR: email inválido"
+        if tipo not in TIPOS_VALIDOS:
+            return "ERROR: tipo inválido: " + tipo
+        if prioridad not in PRIORIDADES_VALIDAS:
+            return "ERROR: prioridad inválida: " + prioridad
+        if descripcion is None or len(descripcion.strip()) < LARGO_MINIMO_DESCRIPCION:
+            return "ERROR: la descripción debe tener al menos " + str(LARGO_MINIMO_DESCRIPCION) + " caracteres"
+        if len(descripcion) > LARGO_MAXIMO_DESCRIPCION:
+            return "ERROR: la descripción no puede superar " + str(LARGO_MAXIMO_DESCRIPCION) + " caracteres"
+        return None
+
+    def _calcular_plazo_en_dias(self, tipo, prioridad):
+        plazo = PLAZO_BASE_EN_DIAS[tipo]
+        if prioridad == PRIORIDAD_ALTA:
+            plazo = plazo // DIVISOR_PLAZO_PRIORIDAD_ALTA
+        elif prioridad == PRIORIDAD_BAJA:
+            plazo = plazo + DIAS_ADICIONALES_PRIORIDAD_BAJA
+        return plazo
+
+    def _obtener_o_crear_estudiante(self, datos, legajo, nombre, email):
+        estudiante = self._buscar_estudiante(datos, legajo)
+        if estudiante is None:
+            estudiante = Estudiante(legajo, nombre.strip(), email)
+            datos["estudiantes"].append(estudiante)
+        return estudiante
 
     def registrar_solicitud(self, legajo, nombre, email, tipo, prioridad, descripcion, fecha=None):
-        # validaciones
-        if legajo is None or legajo == "" or not legajo.isdigit():
-            print("ERROR: legajo inválido")
+        error = self._validar_datos_de_registro(legajo, nombre, email, tipo, prioridad, descripcion)
+        if error:
+            print(error)
             return -1
-        if nombre is None or nombre.strip() == "":
-            print("ERROR: nombre obligatorio")
+        fecha_alta = self._resolver_fecha(fecha)
+        if fecha_alta is None:
+            print(MENSAJE_FECHA_INVALIDA)
             return -1
-        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
-            print("ERROR: email inválido")
-            return -1
-        if tipo not in ["CERTIFICADO", "EQUIVALENCIA", "REINCORPORACION", "CONSULTA"]:
-            print("ERROR: tipo inválido: " + tipo)
-            return -1
-        if prioridad not in ["ALTA", "MEDIA", "BAJA"]:
-            print("ERROR: prioridad inválida: " + prioridad)
-            return -1
-        if descripcion is None or len(descripcion.strip()) < 10:
-            print("ERROR: la descripción debe tener al menos 10 caracteres")
-            return -1
-        if len(descripcion) > 200:
-            print("ERROR: la descripción no puede superar 200 caracteres")
-            return -1
-        # fecha
-        if fecha is None:
-            f = datetime.date.today()
-        else:
-            try:
-                f = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
-            except:
-                print("ERROR: fecha inválida (use AAAA-MM-DD)")
-                return -1
-        # plazo segun tipo y prioridad
-        if tipo == "CERTIFICADO":
-            plazo = 5
-        elif tipo == "EQUIVALENCIA":
-            plazo = 15
-        elif tipo == "REINCORPORACION":
-            plazo = 10
-        elif tipo == "CONSULTA":
-            plazo = 3
-        if prioridad == "ALTA":
-            plazo = plazo // 2
-        elif prioridad == "BAJA":
-            plazo = plazo + 5
-        v = f + datetime.timedelta(days=plazo)
-        # persistencia
-        d = self.cargar()
-        est = None
-        for e in d["estudiantes"]:
-            if e.legajo == legajo:
-                est = e
-        if est is None:
-            est = Estudiante(legajo, nombre.strip(), email)
-            d["estudiantes"].append(est)
-        d["ultimo_id"] = d["ultimo_id"] + 1
-        nid = d["ultimo_id"]
-        s = Solicitud(nid, legajo, tipo, prioridad, "PENDIENTE", descripcion.strip(), f.isoformat(), v.isoformat(), None)
-        d["solicitudes"].append(s)
-        self.guardar(d)
-        print("Solicitud #" + str(nid) + " registrada (tipo=" + tipo + ", prioridad=" + prioridad + ", vence=" + v.isoformat() + ")")
-        print("[NOTIFICACIÓN] Email a " + est.email + ": su solicitud #" + str(nid) + " fue registrada")
-        return nid
+        vencimiento = fecha_alta + datetime.timedelta(days=self._calcular_plazo_en_dias(tipo, prioridad))
 
+        datos = self.cargar()
+        estudiante = self._obtener_o_crear_estudiante(datos, legajo, nombre, email)
+        datos["ultimo_id"] = datos["ultimo_id"] + 1
+        solicitud = Solicitud(datos["ultimo_id"], legajo, tipo, prioridad, PENDIENTE, descripcion.strip(),
+                              fecha_alta.isoformat(), vencimiento.isoformat(), None)
+        datos["solicitudes"].append(solicitud)
+        self.guardar(datos)
+
+        print("Solicitud #" + str(solicitud.id) + " registrada (tipo=" + tipo + ", prioridad=" + prioridad
+              + ", vence=" + solicitud.vence + ")")
+        print("[NOTIFICACIÓN] Email a " + estudiante.email + ": su solicitud #" + str(solicitud.id)
+              + " fue registrada")
+        return solicitud.id
+
+    # ------------------------------------------------------------------
+    # Responsables
+    # ------------------------------------------------------------------
     def alta_responsable(self, nombre, area):
         if nombre is None or nombre.strip() == "" or area is None or area.strip() == "":
             print("ERROR: nombre y área son obligatorios")
             return -1
-        d = self.cargar()
-        d["ultimo_resp"] = d["ultimo_resp"] + 1
-        rid = d["ultimo_resp"]
-        r = Responsable(rid, nombre.strip(), area.strip())
-        d["responsables"].append(r)
-        self.guardar(d)
-        print("Responsable #" + str(rid) + " creado: " + r.nombre + " (" + r.area + ")")
-        return rid
+        datos = self.cargar()
+        datos["ultimo_resp"] = datos["ultimo_resp"] + 1
+        responsable = Responsable(datos["ultimo_resp"], nombre.strip(), area.strip())
+        datos["responsables"].append(responsable)
+        self.guardar(datos)
+        print("Responsable #" + str(responsable.id) + " creado: " + responsable.nombre
+              + " (" + responsable.area + ")")
+        return responsable.id
 
-    def cambiar_estado(self, id, nuevo):
-        if nuevo not in ["PENDIENTE", "EN_PROCESO", "RESUELTA", "RECHAZADA", "CERRADA"]:
-            print("ERROR: estado inválido: " + nuevo)
-            return False
-        d = self.cargar()
-        s = None
-        for x in d["solicitudes"]:
-            if x.id == id:
-                s = x
-        if s is None:
-            print("ERROR: solicitud " + str(id) + " no encontrada")
-            return False
-        viejo = s.estado
-        ok = False
-        if viejo == "PENDIENTE" and (nuevo == "EN_PROCESO" or nuevo == "RECHAZADA"):
-            ok = True
-        elif viejo == "EN_PROCESO" and (nuevo == "RESUELTA" or nuevo == "RECHAZADA"):
-            ok = True
-        elif viejo == "RESUELTA" and nuevo == "CERRADA":
-            ok = True
-        if not ok:
-            print("ERROR: transición no permitida: " + viejo + " -> " + nuevo)
-            return False
-        if nuevo == "EN_PROCESO" and s.responsable_id is None:
-            print("ERROR: la solicitud debe tener un responsable asignado para pasar a EN_PROCESO")
-            return False
-        s.estado = nuevo
-        self.guardar(d)
-        print("Solicitud #" + str(id) + ": " + viejo + " -> " + nuevo)
-        for e in d["estudiantes"]:
-            if e.legajo == s.legajo:
-                print("[NOTIFICACIÓN] Email a " + e.email + ": su solicitud #" + str(id) + " cambió a " + nuevo)
-        return True
+    def _contar_solicitudes_activas(self, datos, id_responsable, id_solicitud_excluida):
+        cantidad = 0
+        for solicitud in datos["solicitudes"]:
+            if (solicitud.responsable_id == id_responsable and solicitud.estado in ESTADOS_ACTIVOS
+                    and solicitud.id != id_solicitud_excluida):
+                cantidad = cantidad + 1
+        return cantidad
 
-    def asignar_responsable(self, id, rid):
-        d = self.cargar()
-        s = None
-        for x in d["solicitudes"]:
-            if x.id == id:
-                s = x
-        if s is None:
-            print("ERROR: solicitud " + str(id) + " no encontrada")
+    def asignar_responsable(self, id_solicitud, id_responsable):
+        datos = self.cargar()
+        solicitud = self._buscar_solicitud(datos, id_solicitud)
+        if solicitud is None:
+            print("ERROR: solicitud " + str(id_solicitud) + " no encontrada")
             return 1
-        r = None
-        for x in d["responsables"]:
-            if x.id == rid:
-                r = x
-        if r is None:
-            print("ERROR: responsable " + str(rid) + " no encontrado")
+        responsable = self._buscar_responsable(datos, id_responsable)
+        if responsable is None:
+            print("ERROR: responsable " + str(id_responsable) + " no encontrado")
             return 2
-        if s.estado == "RESUELTA" or s.estado == "RECHAZADA" or s.estado == "CERRADA":
-            print("ERROR: no se puede asignar responsable a una solicitud " + s.estado)
+        if solicitud.estado in ESTADOS_NO_ASIGNABLES:
+            print("ERROR: no se puede asignar responsable a una solicitud " + solicitud.estado)
             return 3
-        cont = 0
-        for x in d["solicitudes"]:
-            if x.responsable_id == rid and (x.estado == "PENDIENTE" or x.estado == "EN_PROCESO") and x.id != id:
-                cont = cont + 1
-        if cont >= 3:
-            print("ERROR: el responsable " + r.nombre + " alcanzó el máximo de 3 solicitudes activas")
+        if self._contar_solicitudes_activas(datos, id_responsable, id_solicitud) >= MAX_SOLICITUDES_ACTIVAS:
+            print("ERROR: el responsable " + responsable.nombre + " alcanzó el máximo de "
+                  + str(MAX_SOLICITUDES_ACTIVAS) + " solicitudes activas")
             return 4
-        s.responsable_id = rid
-        self.guardar(d)
-        print("Solicitud #" + str(id) + " asignada a " + r.nombre + " (" + r.area + ")")
+        solicitud.responsable_id = id_responsable
+        self.guardar(datos)
+        print("Solicitud #" + str(id_solicitud) + " asignada a " + responsable.nombre
+              + " (" + responsable.area + ")")
         return 0
 
-    def buscar_por_tipo(self, lst, t):
-        res = []
-        for x in lst:
-            if x.tipo == t:
-                res.append(x)
-        return res
+    # ------------------------------------------------------------------
+    # Cambio de estado
+    # ------------------------------------------------------------------
+    def _transicion_permitida(self, estado_actual, estado_nuevo):
+        return estado_nuevo in TRANSICIONES_PERMITIDAS.get(estado_actual, [])
 
-    def buscar_por_estado(self, lst, e):
-        res = []
-        for x in lst:
-            if x.estado == e:
-                res.append(x)
-        return res
+    def cambiar_estado(self, id_solicitud, estado_nuevo):
+        if estado_nuevo not in ESTADOS_VALIDOS:
+            print("ERROR: estado inválido: " + estado_nuevo)
+            return False
+        datos = self.cargar()
+        solicitud = self._buscar_solicitud(datos, id_solicitud)
+        if solicitud is None:
+            print("ERROR: solicitud " + str(id_solicitud) + " no encontrada")
+            return False
+        estado_anterior = solicitud.estado
+        if not self._transicion_permitida(estado_anterior, estado_nuevo):
+            print("ERROR: transición no permitida: " + estado_anterior + " -> " + estado_nuevo)
+            return False
+        if estado_nuevo == EN_PROCESO and solicitud.responsable_id is None:
+            print("ERROR: la solicitud debe tener un responsable asignado para pasar a EN_PROCESO")
+            return False
+        solicitud.estado = estado_nuevo
+        self.guardar(datos)
+        print("Solicitud #" + str(id_solicitud) + ": " + estado_anterior + " -> " + estado_nuevo)
+        estudiante = self._buscar_estudiante(datos, solicitud.legajo)
+        if estudiante is not None:
+            print("[NOTIFICACIÓN] Email a " + estudiante.email + ": su solicitud #" + str(id_solicitud)
+                  + " cambió a " + estado_nuevo)
+        return True
 
-    def buscar_por_prioridad(self, lst, p):
-        res = []
-        for x in lst:
-            if x.prioridad == p:
-                res.append(x)
-        return res
+    # ------------------------------------------------------------------
+    # Búsqueda
+    # ------------------------------------------------------------------
+    def _filtrar_por(self, solicitudes, atributo, valor):
+        return [s for s in solicitudes if getattr(s, atributo) == valor]
 
-    def buscar_por_legajo(self, lst, l):
-        res = []
-        for x in lst:
-            if x.legajo == l:
-                res.append(x)
-        return res
+    def _formatear_linea(self, solicitud):
+        return ("#" + str(solicitud.id) + " | " + solicitud.tipo + " | " + solicitud.prioridad + " | "
+                + solicitud.estado + " | legajo " + solicitud.legajo + " | vence " + solicitud.vence)
 
     def buscar(self, tipo=None, estado=None, prioridad=None, legajo=None):
-        d = self.cargar()
-        lst = d["solicitudes"]
-        if tipo is not None:
-            lst = self.buscar_por_tipo(lst, tipo)
-        if estado is not None:
-            lst = self.buscar_por_estado(lst, estado)
-        if prioridad is not None:
-            lst = self.buscar_por_prioridad(lst, prioridad)
-        if legajo is not None:
-            lst = self.buscar_por_legajo(lst, legajo)
-        if len(lst) == 0:
+        resultado = self.cargar()["solicitudes"]
+        filtros = (("tipo", tipo), ("estado", estado), ("prioridad", prioridad), ("legajo", legajo))
+        for atributo, valor in filtros:
+            if valor is not None:
+                resultado = self._filtrar_por(resultado, atributo, valor)
+        if len(resultado) == 0:
             print("Sin resultados.")
-            return lst
-        for x in lst:
-            print("#" + str(x.id) + " | " + x.tipo + " | " + x.prioridad + " | " + x.estado + " | legajo " + x.legajo + " | vence " + x.vence)
-        return lst
+            return resultado
+        for solicitud in resultado:
+            print(self._formatear_linea(solicitud))
+        return resultado
+
+    # ------------------------------------------------------------------
+    # Reporte
+    # ------------------------------------------------------------------
+    def _contar_por(self, solicitudes, atributo, claves):
+        conteo = {clave: 0 for clave in claves}
+        for solicitud in solicitudes:
+            conteo[getattr(solicitud, atributo)] = conteo[getattr(solicitud, atributo)] + 1
+        return conteo
+
+    def _contar_vencidas(self, solicitudes, fecha_corte):
+        cantidad = 0
+        for solicitud in solicitudes:
+            if solicitud.estado in ESTADOS_ACTIVOS and solicitud.vence < fecha_corte.isoformat():
+                cantidad = cantidad + 1
+        return cantidad
+
+    def _imprimir_reporte(self, total, por_estado, por_tipo, fecha_corte, vencidas):
+        print("=== REPORTE DE SOLICITUDES ===")
+        print("Total: " + str(total))
+        print("Por estado:")
+        for estado in por_estado:
+            print("  " + estado + ": " + str(por_estado[estado]))
+        print("Por tipo:")
+        for tipo in por_tipo:
+            print("  " + tipo + ": " + str(por_tipo[tipo]))
+        print("Vencidas al " + fecha_corte.isoformat() + ": " + str(vencidas))
 
     def reporte(self, hoy=None):
-        if hoy is None:
-            h = datetime.date.today()
-        else:
-            try:
-                h = datetime.datetime.strptime(hoy, "%Y-%m-%d").date()
-            except:
-                print("ERROR: fecha inválida (use AAAA-MM-DD)")
-                return -1
-        d = self.cargar()
-        lst = d["solicitudes"]
-        por_estado = {"PENDIENTE": 0, "EN_PROCESO": 0, "RESUELTA": 0, "RECHAZADA": 0, "CERRADA": 0}
-        por_tipo = {"CERTIFICADO": 0, "EQUIVALENCIA": 0, "REINCORPORACION": 0, "CONSULTA": 0}
-        vencidas = 0
-        for x in lst:
-            por_estado[x.estado] = por_estado[x.estado] + 1
-            por_tipo[x.tipo] = por_tipo[x.tipo] + 1
-            if x.estado == "PENDIENTE" or x.estado == "EN_PROCESO":
-                if x.vence < h.isoformat():
-                    vencidas = vencidas + 1
-        print("=== REPORTE DE SOLICITUDES ===")
-        print("Total: " + str(len(lst)))
-        print("Por estado:")
-        for k in por_estado:
-            print("  " + k + ": " + str(por_estado[k]))
-        print("Por tipo:")
-        for k in por_tipo:
-            print("  " + k + ": " + str(por_tipo[k]))
-        print("Vencidas al " + h.isoformat() + ": " + str(vencidas))
+        fecha_corte = self._resolver_fecha(hoy)
+        if fecha_corte is None:
+            print(MENSAJE_FECHA_INVALIDA)
+            return -1
+        solicitudes = self.cargar()["solicitudes"]
+        self._imprimir_reporte(
+            len(solicitudes),
+            self._contar_por(solicitudes, "estado", ESTADOS_VALIDOS),
+            self._contar_por(solicitudes, "tipo", TIPOS_VALIDOS),
+            fecha_corte,
+            self._contar_vencidas(solicitudes, fecha_corte),
+        )
         return 0
