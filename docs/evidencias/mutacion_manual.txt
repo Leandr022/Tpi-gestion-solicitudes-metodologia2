@@ -1,0 +1,12 @@
+Mutante                                                                        | Unitarias | Caja negra
+---------------------------------------------------------------------------------------------------------
+M1  Prioridad ALTA divide el plazo por 3 en lugar de 2                         | DETECTADO | DETECTADO
+M2  Límite de solicitudes activas pasa de 3 a 4                               | DETECTADO | DETECTADO
+M3  Se elimina la transición RESUELTA -> CERRADA                              | DETECTADO | DETECTADO
+M4  Capacidad del responsable usa <= en lugar de <                             | DETECTADO | DETECTADO
+M5  Vencida usa <= en lugar de < (vence el mismo día)                         | DETECTADO | SOBREVIVE
+M6  Plazo base de CONSULTA pasa de 3 a 4 días                                 | DETECTADO | DETECTADO
+M7  Mensaje de notificación de registro cambia de texto                       | DETECTADO | DETECTADO
+M8  Archivo corrupto se vuelve a tragar en silencio (except sin relanzar)      | DETECTADO | SOBREVIVE
+M9  Asignación permitida a solicitudes RESUELTAS                              | DETECTADO | SOBREVIVE
+M10 Estudiante existente se sobrescribe con los datos nuevos                   | DETECTADO | DETECTADO
