@@ -1,0 +1,31 @@
+NOTA SOBRE ESTA TRANSCRIPCIÓN: texto del primer mensaje del estudiante, transcripto sin los emojis decorativos y
+con las secciones que reproducen la consigna oficial resumidas más abajo (ver TP_MS2V2.pdf para el texto oficial).
+------------------------------------------------------------------------------------------------------------
+
+[ROL]
+Estudiante de la carrera tecnicatura en programacion a distancia de la UTN
+[CONTEXTO]
+Tenemos que realizar un trabajo final integrador, donde quiero que utilicemos un lenguaje acorde a lo academico, te voy a brindar archivos donde tenemos la consigna del tpi, como tambien un modelo orientativo. Estos fueron los temas abordados enMetodología de Sistemas II! En esta materia, dejamos de lado el análisis inicial para enfocarnos en la construcción y calidad de software profesional. Pasaremos de "escribir código que funciona" a "diseñar sistemas robustos, evolutivos y mantenibles", adoptando los estándares que hoy exige la industria tecnológica global.
+Durante la materia, exploraremos temas clave como:
+
+* Calidad de Diseño y Construcción: Aplicación de principios SOLID, Clean Code y técnicas de Refactoring para combatir la deuda técnica.
+* Patrones de Diseño (GoF): Selección e implementación con criterio de patrones creacionales, estructurales y de comportamiento para resolver problemas recurrentes.
+* Verificación y Validación (V&V): Diseño y automatización de pruebas unitarias e integración, junto a estrategias de TDD/BDD.
+* Integración Continua y Repositorios: Gestión avanzada de Git, flujos de trabajo profesionales (PR, Code Review) y automatización de pipelines de calidad (CI).
+* IA como Copiloto Técnico: Uso responsable y ético de Inteligencia Artificial para acelerar el análisis, la documentación y el testing sin perder el criterio técnico.
+* Habilidades Blandas y Comunicación: Gestión de alcance, negociación con stakeholders y presentaciones técnicas/ejecutivas efectivas.
+
+A lo largo de la cursada, el Proyecto Integrador será nuestro eje central, donde aplicarás cada concepto en un entorno de desarrollo real, documentando decisiones técnicas y asegurando la calidad del software desde la primera línea de código hasta su puesta en marcha.
+[CONSIGNAS Y PAUTAS]
+
+Objetivo del Trabajo
+Evaluar la aplicación integrada de los contenidos de Metodología de Sistemas II mediante el análisis y mejora de un sistema de software. El trabajo debe evidenciar la diferencia entre calidad externa e interna, identificar deuda técnica, reconocer code smells, aplicar principios SOLID y Clean Code, ejecutar refactorings seguros y realizar una revisión técnica profesional.
+
+[Omitido en esta transcripción por extensión: el mensaje continuaba con las secciones Tema y Marco Referencial,
+ Etapas obligatorias (8), Formato de Entrega (PDF único, repositorio GitHub, anexo ZIP, video), Importante (Grupos,
+ Autoría, Uso de IA, Privacidad, Evaluación), Rúbrica de evaluación con ponderaciones, Guía para desarrollar el video
+ y Modelo orientativo de presentación. Ese contenido coincide con la consigna oficial adjunta (TP_MS2V2.pdf) y los
+ archivos del modelo orientativo.]
+
+Fragmento relevante sobre el uso de IA, escrito por el estudiante dentro del mismo mensaje:
+"Uso de IA: permitido como apoyo/tutoría, siempre que se declare su uso y se adjunte evidencia. No se admiten voces generadas por IA en el video. (aca cuando realizemos el tp quiero que pongas que se utilizo como apoyo/tutoria y me brindes ejemplos reales para justificar brindando evidencia)"

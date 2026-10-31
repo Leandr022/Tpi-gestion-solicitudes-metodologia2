@@ -1,0 +1,7 @@
+Versión                   CC prom.  CC máx.(bloq) Bloques≥C  MI peor módulo  SLOC   Car.(50)  
+-------------------------------------------------------------------------------------------------------
+estado-inicial             6.5 (B)   23            4            17.28 (gestor.py) 314    50 passed 
+R1 Extract Method          3.7 (A)   12            2            28.26 (gestor.py) 334    50 passed 
+R2 Parameter Object        3.53125 (A) 12            2            28.02 (gestor.py) 359    50 passed 
+R3 Move Method/Table       3.0 (A)   13            3            35.04 (gestor.py) 413    50 passed 
+R4 Extract Class/Excep     2.2 (A)   13            2            33.60 (solicitudes/modelos.py) 463    50 passed 

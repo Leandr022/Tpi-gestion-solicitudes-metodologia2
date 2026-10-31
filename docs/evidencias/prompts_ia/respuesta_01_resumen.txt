@@ -1,0 +1,6 @@
+Respuesta de la IA al prompt 1 (resumen fiel):
+- Confirmó haber entendido la consigna, la rúbrica y el modelo de presentación.
+- Propuso redactar con registro académico siguiendo las 8 etapas obligatorias y las 11 secciones del informe.
+- Anunció que la declaración de uso de IA incluiría herramienta, finalidad y grado de intervención, y que los
+  ejemplos de evidencia se generarían a medida que se trabajara, "para que sean auténticos y no inventados".
+- Preguntó: (1) qué sistema usar, (2) si ya existía código, (3) lenguaje/tecnología y (4) modalidad grupal o individual.

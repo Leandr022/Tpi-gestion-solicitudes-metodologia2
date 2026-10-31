@@ -1,0 +1,27 @@
+digraph refactorizada {
+  rankdir=TB; fontname="DejaVu Sans"; node [fontname="DejaVu Sans", fontsize=11, shape=box, style="rounded,filled"]; edge [fontname="DejaVu Sans", fontsize=9];
+  labelloc=t; label="Versión refactorizada (estado-refactorizado): responsabilidades separadas y dependencias hacia abstracciones";
+  main [label="main.py", fillcolor="#e8eef7"];
+  cli [label="cli.py\nraíz de composición\n(argumentos, errores → código de salida)", fillcolor="#e8eef7"];
+  servicio [label="servicio.py\nServicioSolicitudes\n(casos de uso, sin E/S)", fillcolor="#e3f4e3", color="#27ae60", penwidth=2];
+  modelos [label="modelos.py  (dominio)\nTipo · Prioridad · Estado (enumeraciones)\nSolicitud · Responsable · Estudiante\nRegistroAcademico · DatosSolicitud · CriteriosBusqueda", fillcolor="#fff4d6"];
+  errores [label="errores.py\nErrorDeDominio", fillcolor="#fff4d6"];
+  presentacion [label="presentacion.py\n(formato de texto)", fillcolor="#f3e8fb"];
+  puerto_repo [label="«abstracción»\nRepositorioDeRegistro", fillcolor="#ffffff", style="rounded,dashed,filled"];
+  repo_json [label="RepositorioJSON\n(datos.json, escritura atómica)", fillcolor="#eeeeee"];
+  puerto_not [label="«abstracción»\nNotificador", fillcolor="#ffffff", style="rounded,dashed,filled"];
+  not_consola [label="NotificadorConsola", fillcolor="#eeeeee"];
+  main -> cli;
+  cli -> servicio [label="invoca"];
+  cli -> presentacion [label="formatea"];
+  cli -> repo_json [label="crea e inyecta", style=dashed];
+  cli -> not_consola [label="crea e inyecta", style=dashed];
+  servicio -> modelos; servicio -> errores;
+  servicio -> puerto_repo [label="usa vía contrato\n(inyección)", style=dashed];
+  repo_json -> puerto_repo [label="implementa", arrowhead=empty];
+  repo_json -> modelos;
+  not_consola -> puerto_not [label="implementa", arrowhead=empty];
+  not_consola -> presentacion;
+  cli -> puerto_not [label="usa vía contrato", style=dashed];
+  modelos -> errores;
+}

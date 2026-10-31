@@ -53,7 +53,7 @@ defectos o pérdida de datos al modificar) se combinan en una prioridad de corre
 | CS-10 | **Nombres poco expresivos / Primitive Obsession** | Variables `d`, `x`, `e`, `s`, `r`, `f`, `v`, `h`, `lst`, `cont`, y el parámetro `l` (flake8 E741); fechas manipuladas como cadenas ISO y comparadas como texto (`gestor.py:246`) | Medio: reduce la legibilidad | Medio | Media |
 
 **Observaciones adicionales (deuda aceptada).** (i) La escritura de `datos.json` no es atómica
-(`gestor.py:28-37`): una interrupción durante el guardado podría truncar el archivo; (ii) no existe
+(`gestor.py:28-37`): una interrupción durante el guardado podría truncar el archivo *(resuelto luego en R4 con escritura atómica, ver `docs/decisiones_tecnicas.md` D5)*; (ii) no existe
 protección frente a ejecuciones concurrentes; (iii) el archivo se lee y reescribe completo en cada
 operación. Estos puntos se documentan como mejoras futuras, ya que exceden el alcance acotado del
 trabajo.

@@ -1,0 +1,13 @@
+digraph inicial {
+  rankdir=LR; fontname="DejaVu Sans"; node [fontname="DejaVu Sans", fontsize=11, shape=box, style="rounded,filled"]; edge [fontname="DejaVu Sans", fontsize=9];
+  labelloc=t; label="Versión inicial (estado-inicial): una clase concentra todas las responsabilidades";
+  main  [label="main.py\n(CLI + despacho if/elif)", fillcolor="#e8eef7"];
+  gestor [label="GestorSolicitudes  (God Class)\n──────────────\n• validación de datos\n• reglas de negocio (plazos, estados, límites)\n• acceso a archivo (RUTA global)\n• notificaciones (print)\n• presentación (print)\n• 12 métodos · complejidad máx. 23", fillcolor="#fde3e3", color="#c0392b", penwidth=2];
+  modelos [label="modelos.py\nEstudiante · Responsable · Solicitud\n(solo atributos: modelo anémico)", fillcolor="#fff4d6"];
+  datos [label="datos.json", shape=cylinder, fillcolor="#eeeeee"];
+  consola [label="Consola\n(print)", shape=component, fillcolor="#eeeeee"];
+  main -> gestor [label="7 parámetros sueltos\ncódigos de retorno"];
+  gestor -> modelos [label="manipula atributos\ndirectamente"];
+  gestor -> datos [label="lee/escribe\n(except: silencioso)"];
+  gestor -> consola [label="resultados, errores\ny notificaciones"];
+}

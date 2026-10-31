@@ -1,0 +1,1 @@
+Vamos a usar el sistema de gestion de solicitudes academicas como sugiere la consigna. El codigo no existe, vamos a utilizar Python y la modalidad es Individual
