@@ -2,6 +2,7 @@ import sys
 import argparse
 
 from gestor import GestorSolicitudes
+from modelos import CriteriosBusqueda, DatosSolicitud
 
 
 def main():
@@ -42,7 +43,8 @@ def main():
     gs = GestorSolicitudes()
 
     if x.cmd == "registrar":
-        r = gs.registrar_solicitud(x.legajo, x.nombre, x.email, x.tipo, x.prioridad, x.descripcion, x.fecha)
+        datos_solicitud = DatosSolicitud(x.legajo, x.nombre, x.email, x.tipo, x.prioridad, x.descripcion, x.fecha)
+        r = gs.registrar_solicitud(datos_solicitud)
         if r == -1:
             sys.exit(1)
     elif x.cmd == "alta-responsable":
@@ -58,7 +60,7 @@ def main():
         if r != 0:
             sys.exit(1)
     elif x.cmd == "buscar":
-        gs.buscar(x.tipo, x.estado, x.prioridad, x.legajo)
+        gs.buscar(CriteriosBusqueda(x.tipo, x.estado, x.prioridad, x.legajo))
     elif x.cmd == "reporte":
         r = gs.reporte(x.hoy)
         if r == -1:

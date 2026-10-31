@@ -110,18 +110,20 @@ class GestorSolicitudes:
     # ------------------------------------------------------------------
     # Registrar solicitud
     # ------------------------------------------------------------------
-    def _validar_datos_de_registro(self, legajo, nombre, email, tipo, prioridad, descripcion):
+    def _validar_datos_de_registro(self, datos_solicitud):
         """Devuelve el mensaje de error de la primera regla incumplida, o None si todo es válido."""
-        if legajo is None or legajo == "" or not legajo.isdigit():
+        if (datos_solicitud.legajo is None or datos_solicitud.legajo == ""
+                or not datos_solicitud.legajo.isdigit()):
             return "ERROR: legajo inválido"
-        if nombre is None or nombre.strip() == "":
+        if datos_solicitud.nombre is None or datos_solicitud.nombre.strip() == "":
             return "ERROR: nombre obligatorio"
-        if not re.match(PATRON_EMAIL, email):
+        if not re.match(PATRON_EMAIL, datos_solicitud.email):
             return "ERROR: email inválido"
-        if tipo not in TIPOS_VALIDOS:
-            return "ERROR: tipo inválido: " + tipo
-        if prioridad not in PRIORIDADES_VALIDAS:
-            return "ERROR: prioridad inválida: " + prioridad
+        if datos_solicitud.tipo not in TIPOS_VALIDOS:
+            return "ERROR: tipo inválido: " + datos_solicitud.tipo
+        if datos_solicitud.prioridad not in PRIORIDADES_VALIDAS:
+            return "ERROR: prioridad inválida: " + datos_solicitud.prioridad
+        descripcion = datos_solicitud.descripcion
         if descripcion is None or len(descripcion.strip()) < LARGO_MINIMO_DESCRIPCION:
             return "ERROR: la descripción debe tener al menos " + str(LARGO_MINIMO_DESCRIPCION) + " caracteres"
         if len(descripcion) > LARGO_MAXIMO_DESCRIPCION:
@@ -143,27 +145,30 @@ class GestorSolicitudes:
             datos["estudiantes"].append(estudiante)
         return estudiante
 
-    def registrar_solicitud(self, legajo, nombre, email, tipo, prioridad, descripcion, fecha=None):
-        error = self._validar_datos_de_registro(legajo, nombre, email, tipo, prioridad, descripcion)
+    def registrar_solicitud(self, datos_solicitud):
+        error = self._validar_datos_de_registro(datos_solicitud)
         if error:
             print(error)
             return -1
-        fecha_alta = self._resolver_fecha(fecha)
+        fecha_alta = self._resolver_fecha(datos_solicitud.fecha)
         if fecha_alta is None:
             print(MENSAJE_FECHA_INVALIDA)
             return -1
-        vencimiento = fecha_alta + datetime.timedelta(days=self._calcular_plazo_en_dias(tipo, prioridad))
+        plazo = self._calcular_plazo_en_dias(datos_solicitud.tipo, datos_solicitud.prioridad)
+        vencimiento = fecha_alta + datetime.timedelta(days=plazo)
 
         datos = self.cargar()
-        estudiante = self._obtener_o_crear_estudiante(datos, legajo, nombre, email)
+        estudiante = self._obtener_o_crear_estudiante(
+            datos, datos_solicitud.legajo, datos_solicitud.nombre, datos_solicitud.email)
         datos["ultimo_id"] = datos["ultimo_id"] + 1
-        solicitud = Solicitud(datos["ultimo_id"], legajo, tipo, prioridad, PENDIENTE, descripcion.strip(),
+        solicitud = Solicitud(datos["ultimo_id"], datos_solicitud.legajo, datos_solicitud.tipo,
+                              datos_solicitud.prioridad, PENDIENTE, datos_solicitud.descripcion.strip(),
                               fecha_alta.isoformat(), vencimiento.isoformat(), None)
         datos["solicitudes"].append(solicitud)
         self.guardar(datos)
 
-        print("Solicitud #" + str(solicitud.id) + " registrada (tipo=" + tipo + ", prioridad=" + prioridad
-              + ", vence=" + solicitud.vence + ")")
+        print("Solicitud #" + str(solicitud.id) + " registrada (tipo=" + solicitud.tipo + ", prioridad="
+              + solicitud.prioridad + ", vence=" + solicitud.vence + ")")
         print("[NOTIFICACIÓN] Email a " + estudiante.email + ": su solicitud #" + str(solicitud.id)
               + " fue registrada")
         return solicitud.id
@@ -256,9 +261,10 @@ class GestorSolicitudes:
         return ("#" + str(solicitud.id) + " | " + solicitud.tipo + " | " + solicitud.prioridad + " | "
                 + solicitud.estado + " | legajo " + solicitud.legajo + " | vence " + solicitud.vence)
 
-    def buscar(self, tipo=None, estado=None, prioridad=None, legajo=None):
+    def buscar(self, criterios):
         resultado = self.cargar()["solicitudes"]
-        filtros = (("tipo", tipo), ("estado", estado), ("prioridad", prioridad), ("legajo", legajo))
+        filtros = (("tipo", criterios.tipo), ("estado", criterios.estado),
+                   ("prioridad", criterios.prioridad), ("legajo", criterios.legajo))
         for atributo, valor in filtros:
             if valor is not None:
                 resultado = self._filtrar_por(resultado, atributo, valor)
