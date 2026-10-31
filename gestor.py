@@ -1,41 +1,12 @@
 import json
 import os
-import re
 import datetime
 
-from modelos import Estudiante, Responsable, Solicitud
+from modelos import Estado, Estudiante, Prioridad, Responsable, Solicitud, Tipo
 
 RUTA_DATOS = "datos.json"
 FORMATO_FECHA = "%Y-%m-%d"
-PATRON_EMAIL = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 MENSAJE_FECHA_INVALIDA = "ERROR: fecha inválida (use AAAA-MM-DD)"
-
-LARGO_MINIMO_DESCRIPCION = 10
-LARGO_MAXIMO_DESCRIPCION = 200
-MAX_SOLICITUDES_ACTIVAS = 3
-
-TIPOS_VALIDOS = ["CERTIFICADO", "EQUIVALENCIA", "REINCORPORACION", "CONSULTA"]
-PRIORIDADES_VALIDAS = ["ALTA", "MEDIA", "BAJA"]
-PRIORIDAD_ALTA = "ALTA"
-PRIORIDAD_BAJA = "BAJA"
-
-PENDIENTE = "PENDIENTE"
-EN_PROCESO = "EN_PROCESO"
-RESUELTA = "RESUELTA"
-RECHAZADA = "RECHAZADA"
-CERRADA = "CERRADA"
-ESTADOS_VALIDOS = [PENDIENTE, EN_PROCESO, RESUELTA, RECHAZADA, CERRADA]
-ESTADOS_ACTIVOS = [PENDIENTE, EN_PROCESO]
-ESTADOS_NO_ASIGNABLES = [RESUELTA, RECHAZADA, CERRADA]
-TRANSICIONES_PERMITIDAS = {
-    PENDIENTE: [EN_PROCESO, RECHAZADA],
-    EN_PROCESO: [RESUELTA, RECHAZADA],
-    RESUELTA: [CERRADA],
-}
-
-PLAZO_BASE_EN_DIAS = {"CERTIFICADO": 5, "EQUIVALENCIA": 15, "REINCORPORACION": 10, "CONSULTA": 3}
-DIVISOR_PLAZO_PRIORIDAD_ALTA = 2
-DIAS_ADICIONALES_PRIORIDAD_BAJA = 5
 
 
 class GestorSolicitudes:
@@ -55,27 +26,39 @@ class GestorSolicitudes:
         archivo.close()
         datos["estudiantes"] = [Estudiante(e["legajo"], e["nombre"], e["email"]) for e in datos["estudiantes"]]
         datos["responsables"] = [Responsable(r["id"], r["nombre"], r["area"]) for r in datos["responsables"]]
-        datos["solicitudes"] = [
-            Solicitud(s["id"], s["legajo"], s["tipo"], s["prioridad"], s["estado"], s["descripcion"],
-                      s["fecha"], s["vence"], s["responsable_id"])
-            for s in datos["solicitudes"]
-        ]
+        datos["solicitudes"] = [self._desde_registro(s) for s in datos["solicitudes"]]
         return datos
+
+    def _desde_registro(self, registro):
+        return Solicitud(
+            id=registro["id"], legajo=registro["legajo"], tipo=Tipo(registro["tipo"]),
+            prioridad=Prioridad(registro["prioridad"]), estado=Estado(registro["estado"]),
+            descripcion=registro["descripcion"], fecha=datetime.date.fromisoformat(registro["fecha"]),
+            vence=datetime.date.fromisoformat(registro["vence"]), responsable_id=registro["responsable_id"],
+        )
+
+    def _a_registro(self, solicitud):
+        return {
+            "id": solicitud.id, "legajo": solicitud.legajo, "tipo": str(solicitud.tipo),
+            "prioridad": str(solicitud.prioridad), "estado": str(solicitud.estado),
+            "descripcion": solicitud.descripcion, "fecha": solicitud.fecha.isoformat(),
+            "vence": solicitud.vence.isoformat(), "responsable_id": solicitud.responsable_id,
+        }
 
     def guardar(self, datos):
         salida = {
             "ultimo_id": datos["ultimo_id"],
             "ultimo_resp": datos["ultimo_resp"],
-            "estudiantes": [e.__dict__ for e in datos["estudiantes"]],
-            "responsables": [r.__dict__ for r in datos["responsables"]],
-            "solicitudes": [s.__dict__ for s in datos["solicitudes"]],
+            "estudiantes": [vars(e) for e in datos["estudiantes"]],
+            "responsables": [vars(r) for r in datos["responsables"]],
+            "solicitudes": [self._a_registro(s) for s in datos["solicitudes"]],
         }
         archivo = open(RUTA_DATOS, "w", encoding="utf-8")
         archivo.write(json.dumps(salida, indent=2, ensure_ascii=False))
         archivo.close()
 
     # ------------------------------------------------------------------
-    # Consultas auxiliares (antes duplicadas en cada operación)
+    # Consultas auxiliares
     # ------------------------------------------------------------------
     def _buscar_solicitud(self, datos, id_solicitud):
         encontrada = None
@@ -110,43 +93,15 @@ class GestorSolicitudes:
     # ------------------------------------------------------------------
     # Registrar solicitud
     # ------------------------------------------------------------------
-    def _validar_datos_de_registro(self, datos_solicitud):
-        """Devuelve el mensaje de error de la primera regla incumplida, o None si todo es válido."""
-        if (datos_solicitud.legajo is None or datos_solicitud.legajo == ""
-                or not datos_solicitud.legajo.isdigit()):
-            return "ERROR: legajo inválido"
-        if datos_solicitud.nombre is None or datos_solicitud.nombre.strip() == "":
-            return "ERROR: nombre obligatorio"
-        if not re.match(PATRON_EMAIL, datos_solicitud.email):
-            return "ERROR: email inválido"
-        if datos_solicitud.tipo not in TIPOS_VALIDOS:
-            return "ERROR: tipo inválido: " + datos_solicitud.tipo
-        if datos_solicitud.prioridad not in PRIORIDADES_VALIDAS:
-            return "ERROR: prioridad inválida: " + datos_solicitud.prioridad
-        descripcion = datos_solicitud.descripcion
-        if descripcion is None or len(descripcion.strip()) < LARGO_MINIMO_DESCRIPCION:
-            return "ERROR: la descripción debe tener al menos " + str(LARGO_MINIMO_DESCRIPCION) + " caracteres"
-        if len(descripcion) > LARGO_MAXIMO_DESCRIPCION:
-            return "ERROR: la descripción no puede superar " + str(LARGO_MAXIMO_DESCRIPCION) + " caracteres"
-        return None
-
-    def _calcular_plazo_en_dias(self, tipo, prioridad):
-        plazo = PLAZO_BASE_EN_DIAS[tipo]
-        if prioridad == PRIORIDAD_ALTA:
-            plazo = plazo // DIVISOR_PLAZO_PRIORIDAD_ALTA
-        elif prioridad == PRIORIDAD_BAJA:
-            plazo = plazo + DIAS_ADICIONALES_PRIORIDAD_BAJA
-        return plazo
-
-    def _obtener_o_crear_estudiante(self, datos, legajo, nombre, email):
-        estudiante = self._buscar_estudiante(datos, legajo)
+    def _obtener_o_crear_estudiante(self, datos, datos_solicitud):
+        estudiante = self._buscar_estudiante(datos, datos_solicitud.legajo)
         if estudiante is None:
-            estudiante = Estudiante(legajo, nombre.strip(), email)
+            estudiante = Estudiante(datos_solicitud.legajo, datos_solicitud.nombre.strip(), datos_solicitud.email)
             datos["estudiantes"].append(estudiante)
         return estudiante
 
     def registrar_solicitud(self, datos_solicitud):
-        error = self._validar_datos_de_registro(datos_solicitud)
+        error = datos_solicitud.primer_error()
         if error:
             print(error)
             return -1
@@ -154,21 +109,16 @@ class GestorSolicitudes:
         if fecha_alta is None:
             print(MENSAJE_FECHA_INVALIDA)
             return -1
-        plazo = self._calcular_plazo_en_dias(datos_solicitud.tipo, datos_solicitud.prioridad)
-        vencimiento = fecha_alta + datetime.timedelta(days=plazo)
 
         datos = self.cargar()
-        estudiante = self._obtener_o_crear_estudiante(
-            datos, datos_solicitud.legajo, datos_solicitud.nombre, datos_solicitud.email)
+        estudiante = self._obtener_o_crear_estudiante(datos, datos_solicitud)
         datos["ultimo_id"] = datos["ultimo_id"] + 1
-        solicitud = Solicitud(datos["ultimo_id"], datos_solicitud.legajo, datos_solicitud.tipo,
-                              datos_solicitud.prioridad, PENDIENTE, datos_solicitud.descripcion.strip(),
-                              fecha_alta.isoformat(), vencimiento.isoformat(), None)
+        solicitud = Solicitud.nueva(datos["ultimo_id"], datos_solicitud, fecha_alta)
         datos["solicitudes"].append(solicitud)
         self.guardar(datos)
 
         print("Solicitud #" + str(solicitud.id) + " registrada (tipo=" + solicitud.tipo + ", prioridad="
-              + solicitud.prioridad + ", vence=" + solicitud.vence + ")")
+              + solicitud.prioridad + ", vence=" + solicitud.vence.isoformat() + ")")
         print("[NOTIFICACIÓN] Email a " + estudiante.email + ": su solicitud #" + str(solicitud.id)
               + " fue registrada")
         return solicitud.id
@@ -192,7 +142,7 @@ class GestorSolicitudes:
     def _contar_solicitudes_activas(self, datos, id_responsable, id_solicitud_excluida):
         cantidad = 0
         for solicitud in datos["solicitudes"]:
-            if (solicitud.responsable_id == id_responsable and solicitud.estado in ESTADOS_ACTIVOS
+            if (solicitud.responsable_id == id_responsable and solicitud.esta_activa
                     and solicitud.id != id_solicitud_excluida):
                 cantidad = cantidad + 1
         return cantidad
@@ -207,14 +157,15 @@ class GestorSolicitudes:
         if responsable is None:
             print("ERROR: responsable " + str(id_responsable) + " no encontrado")
             return 2
-        if solicitud.estado in ESTADOS_NO_ASIGNABLES:
+        if not solicitud.admite_asignacion:
             print("ERROR: no se puede asignar responsable a una solicitud " + solicitud.estado)
             return 3
-        if self._contar_solicitudes_activas(datos, id_responsable, id_solicitud) >= MAX_SOLICITUDES_ACTIVAS:
+        activas = self._contar_solicitudes_activas(datos, id_responsable, id_solicitud)
+        if not responsable.tiene_capacidad(activas):
             print("ERROR: el responsable " + responsable.nombre + " alcanzó el máximo de "
-                  + str(MAX_SOLICITUDES_ACTIVAS) + " solicitudes activas")
+                  + str(Responsable.MAX_SOLICITUDES_ACTIVAS) + " solicitudes activas")
             return 4
-        solicitud.responsable_id = id_responsable
+        solicitud.asignar_a(id_responsable)
         self.guardar(datos)
         print("Solicitud #" + str(id_solicitud) + " asignada a " + responsable.nombre
               + " (" + responsable.area + ")")
@@ -223,12 +174,11 @@ class GestorSolicitudes:
     # ------------------------------------------------------------------
     # Cambio de estado
     # ------------------------------------------------------------------
-    def _transicion_permitida(self, estado_actual, estado_nuevo):
-        return estado_nuevo in TRANSICIONES_PERMITIDAS.get(estado_actual, [])
-
-    def cambiar_estado(self, id_solicitud, estado_nuevo):
-        if estado_nuevo not in ESTADOS_VALIDOS:
-            print("ERROR: estado inválido: " + estado_nuevo)
+    def cambiar_estado(self, id_solicitud, texto_estado):
+        try:
+            estado_nuevo = Estado(texto_estado)
+        except ValueError:
+            print("ERROR: estado inválido: " + texto_estado)
             return False
         datos = self.cargar()
         solicitud = self._buscar_solicitud(datos, id_solicitud)
@@ -236,13 +186,13 @@ class GestorSolicitudes:
             print("ERROR: solicitud " + str(id_solicitud) + " no encontrada")
             return False
         estado_anterior = solicitud.estado
-        if not self._transicion_permitida(estado_anterior, estado_nuevo):
+        if not solicitud.puede_pasar_a(estado_nuevo):
             print("ERROR: transición no permitida: " + estado_anterior + " -> " + estado_nuevo)
             return False
-        if estado_nuevo == EN_PROCESO and solicitud.responsable_id is None:
+        if solicitud.falta_responsable_para(estado_nuevo):
             print("ERROR: la solicitud debe tener un responsable asignado para pasar a EN_PROCESO")
             return False
-        solicitud.estado = estado_nuevo
+        solicitud.pasar_a(estado_nuevo)
         self.guardar(datos)
         print("Solicitud #" + str(id_solicitud) + ": " + estado_anterior + " -> " + estado_nuevo)
         estudiante = self._buscar_estudiante(datos, solicitud.legajo)
@@ -259,7 +209,8 @@ class GestorSolicitudes:
 
     def _formatear_linea(self, solicitud):
         return ("#" + str(solicitud.id) + " | " + solicitud.tipo + " | " + solicitud.prioridad + " | "
-                + solicitud.estado + " | legajo " + solicitud.legajo + " | vence " + solicitud.vence)
+                + solicitud.estado + " | legajo " + solicitud.legajo + " | vence "
+                + solicitud.vence.isoformat())
 
     def buscar(self, criterios):
         resultado = self.cargar()["solicitudes"]
@@ -284,13 +235,6 @@ class GestorSolicitudes:
             conteo[getattr(solicitud, atributo)] = conteo[getattr(solicitud, atributo)] + 1
         return conteo
 
-    def _contar_vencidas(self, solicitudes, fecha_corte):
-        cantidad = 0
-        for solicitud in solicitudes:
-            if solicitud.estado in ESTADOS_ACTIVOS and solicitud.vence < fecha_corte.isoformat():
-                cantidad = cantidad + 1
-        return cantidad
-
     def _imprimir_reporte(self, total, por_estado, por_tipo, fecha_corte, vencidas):
         print("=== REPORTE DE SOLICITUDES ===")
         print("Total: " + str(total))
@@ -308,11 +252,12 @@ class GestorSolicitudes:
             print(MENSAJE_FECHA_INVALIDA)
             return -1
         solicitudes = self.cargar()["solicitudes"]
+        vencidas = len([s for s in solicitudes if s.esta_vencida(fecha_corte)])
         self._imprimir_reporte(
             len(solicitudes),
-            self._contar_por(solicitudes, "estado", ESTADOS_VALIDOS),
-            self._contar_por(solicitudes, "tipo", TIPOS_VALIDOS),
+            self._contar_por(solicitudes, "estado", list(Estado)),
+            self._contar_por(solicitudes, "tipo", list(Tipo)),
             fecha_corte,
-            self._contar_vencidas(solicitudes, fecha_corte),
+            vencidas,
         )
         return 0
