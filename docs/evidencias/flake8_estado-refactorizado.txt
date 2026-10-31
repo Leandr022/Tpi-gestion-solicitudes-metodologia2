@@ -1,0 +1,2 @@
+# flake8 (--max-line-length=120) — estado-refactorizado
+exit=0

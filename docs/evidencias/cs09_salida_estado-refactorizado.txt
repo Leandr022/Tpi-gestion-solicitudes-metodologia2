@@ -1,0 +1,9 @@
+1) Se registra una solicitud (Ana, legajo 1001)
+Solicitud #1 registrada (tipo=CERTIFICADO, prioridad=ALTA, vence=2026-11-04)
+   archivo legible -> solicitudes (cantidad, ids): 1 [1]
+2) Se simula un truncamiento del archivo (corrupción)
+   archivo ilegible (corrupto)
+3) Se intenta registrar otra solicitud (Luis, legajo 1002)
+ERROR: el archivo de datos está corrupto: datos.json
+   archivo ilegible (corrupto)
+   contenido original del archivo conservado: SI
