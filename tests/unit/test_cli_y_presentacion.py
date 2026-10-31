@@ -75,8 +75,9 @@ def test_flujo_completo_por_la_cli(tmp_path, capsys):
 def test_formato_del_reporte():
     reporte = Reporte(0, {e: 0 for e in Estado}, {t: 0 for t in Tipo}, datetime.date(2026, 11, 2), 0)
     lineas = formatear_reporte(reporte)
-    assert len(lineas) == 14
-    assert lineas[3] == "  PENDIENTE: 0" and lineas[9] == "  CERTIFICADO: 0"
+    # título + total + encabezado + estados + encabezado + tipos + vencidas (no depende de cuántos tipos existan)
+    assert len(lineas) == 3 + len(Estado) + 1 + len(Tipo) + 1
+    assert lineas[3] == "  PENDIENTE: 0" and lineas[3 + len(Estado) + 1] == "  CERTIFICADO: 0"
 
 
 def test_formato_de_notificacion():

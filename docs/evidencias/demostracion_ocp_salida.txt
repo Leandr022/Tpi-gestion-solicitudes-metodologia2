@@ -1,0 +1,31 @@
+# Cambio realizado (líneas agregadas respecto del código original):
+>     BECA = "BECA"
+>     Tipo.BECA: 8,
+
+$ registrar --tipo BECA --prioridad MEDIA --fecha 2026-11-02
+Solicitud #1 registrada (tipo=BECA, prioridad=MEDIA, vence=2026-11-10)
+[NOTIFICACIÓN] Email a ana@example.com: su solicitud #1 fue registrada
+
+$ registrar --tipo BECA --prioridad ALTA --fecha 2026-11-02
+Solicitud #2 registrada (tipo=BECA, prioridad=ALTA, vence=2026-11-06)
+[NOTIFICACIÓN] Email a luis@example.com: su solicitud #2 fue registrada
+
+$ reporte --hoy 2026-11-20   (se muestran las líneas de tipos)
+=== REPORTE DE SOLICITUDES ===
+Total: 2
+  CERTIFICADO: 0
+  EQUIVALENCIA: 0
+  REINCORPORACION: 0
+  CONSULTA: 0
+  BECA: 2
+Vencidas al 2026-11-20: 2
+
+$ registrar --tipo INEXISTENTE   (la validación sigue funcionando)
+ERROR: tipo inválido: INEXISTENTE
+
+# Suite completa sobre la copia modificada.
+# Resultado esperado: solo fallan las 2 pruebas que fijan el TEXTO LITERAL del reporte, porque el
+# reporte ahora incluye legítimamente la línea 'BECA: 0'. No hay regresiones en la lógica de negocio.
+FAILED tests/test_caracterizacion.py::test_reporte - AssertionError: assert [...
+FAILED tests/test_caracterizacion.py::test_escenario_completo_coincide_con_resultado_de_referencia
+2 failed, 171 passed in 9.28s
