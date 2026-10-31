@@ -1,0 +1,149 @@
+$ alta-responsable --nombre Marta Ruiz --area Secretaría Académica
+Responsable #1 creado: Marta Ruiz (Secretaría Académica)
+[codigo=0]
+$ alta-responsable --nombre Jorge Díaz --area Bedelía
+Responsable #2 creado: Jorge Díaz (Bedelía)
+[codigo=0]
+$ registrar --legajo 1001 --nombre Ana Gómez --email ana@example.com --tipo CERTIFICADO --prioridad ALTA --descripcion Certificado de alumno regular --fecha 2026-11-02
+Solicitud #1 registrada (tipo=CERTIFICADO, prioridad=ALTA, vence=2026-11-04)
+[NOTIFICACIÓN] Email a ana@example.com: su solicitud #1 fue registrada
+[codigo=0]
+$ registrar --legajo 1002 --nombre Luis Pérez --email luis@example.com --tipo EQUIVALENCIA --prioridad MEDIA --descripcion Equivalencia de Matemática I --fecha 2026-11-03
+Solicitud #2 registrada (tipo=EQUIVALENCIA, prioridad=MEDIA, vence=2026-11-18)
+[NOTIFICACIÓN] Email a luis@example.com: su solicitud #2 fue registrada
+[codigo=0]
+$ registrar --legajo 1003 --nombre Eva Soto --email eva@example.com --tipo REINCORPORACION --prioridad BAJA --descripcion Reincorporación a la carrera --fecha 2026-11-04
+Solicitud #3 registrada (tipo=REINCORPORACION, prioridad=BAJA, vence=2026-11-19)
+[NOTIFICACIÓN] Email a eva@example.com: su solicitud #3 fue registrada
+[codigo=0]
+$ registrar --legajo 1001 --nombre Ana Gómez --email ana@example.com --tipo CONSULTA --prioridad ALTA --descripcion Consulta sobre correlativas --fecha 2026-11-05
+Solicitud #4 registrada (tipo=CONSULTA, prioridad=ALTA, vence=2026-11-06)
+[NOTIFICACIÓN] Email a ana@example.com: su solicitud #4 fue registrada
+[codigo=0]
+$ asignar --id 1 --responsable-id 1
+Solicitud #1 asignada a Marta Ruiz (Secretaría Académica)
+[codigo=0]
+$ asignar --id 2 --responsable-id 2
+Solicitud #2 asignada a Jorge Díaz (Bedelía)
+[codigo=0]
+$ asignar --id 9 --responsable-id 1
+ERROR: solicitud 9 no encontrada
+[codigo=1]
+$ cambiar-estado --id 1 --estado EN_PROCESO
+Solicitud #1: PENDIENTE -> EN_PROCESO
+[NOTIFICACIÓN] Email a ana@example.com: su solicitud #1 cambió a EN_PROCESO
+[codigo=0]
+$ cambiar-estado --id 3 --estado EN_PROCESO
+ERROR: la solicitud debe tener un responsable asignado para pasar a EN_PROCESO
+[codigo=1]
+$ cambiar-estado --id 1 --estado RESUELTA
+Solicitud #1: EN_PROCESO -> RESUELTA
+[NOTIFICACIÓN] Email a ana@example.com: su solicitud #1 cambió a RESUELTA
+[codigo=0]
+$ cambiar-estado --id 4 --estado RECHAZADA
+Solicitud #4: PENDIENTE -> RECHAZADA
+[NOTIFICACIÓN] Email a ana@example.com: su solicitud #4 cambió a RECHAZADA
+[codigo=0]
+$ buscar --legajo 1001
+#1 | CERTIFICADO | ALTA | RESUELTA | legajo 1001 | vence 2026-11-04
+#4 | CONSULTA | ALTA | RECHAZADA | legajo 1001 | vence 2026-11-06
+[codigo=0]
+$ buscar --estado PENDIENTE --prioridad BAJA
+#3 | REINCORPORACION | BAJA | PENDIENTE | legajo 1003 | vence 2026-11-19
+[codigo=0]
+$ reporte --hoy 2026-11-12
+=== REPORTE DE SOLICITUDES ===
+Total: 4
+Por estado:
+  PENDIENTE: 2
+  EN_PROCESO: 0
+  RESUELTA: 1
+  RECHAZADA: 1
+  CERRADA: 0
+Por tipo:
+  CERTIFICADO: 1
+  EQUIVALENCIA: 1
+  REINCORPORACION: 1
+  CONSULTA: 1
+Vencidas al 2026-11-12: 0
+[codigo=0]
+--- datos.json ---
+{
+  "ultimo_id": 4,
+  "ultimo_resp": 2,
+  "estudiantes": [
+    {
+      "legajo": "1001",
+      "nombre": "Ana Gómez",
+      "email": "ana@example.com"
+    },
+    {
+      "legajo": "1002",
+      "nombre": "Luis Pérez",
+      "email": "luis@example.com"
+    },
+    {
+      "legajo": "1003",
+      "nombre": "Eva Soto",
+      "email": "eva@example.com"
+    }
+  ],
+  "responsables": [
+    {
+      "id": 1,
+      "nombre": "Marta Ruiz",
+      "area": "Secretaría Académica"
+    },
+    {
+      "id": 2,
+      "nombre": "Jorge Díaz",
+      "area": "Bedelía"
+    }
+  ],
+  "solicitudes": [
+    {
+      "id": 1,
+      "legajo": "1001",
+      "tipo": "CERTIFICADO",
+      "prioridad": "ALTA",
+      "estado": "RESUELTA",
+      "descripcion": "Certificado de alumno regular",
+      "fecha": "2026-11-02",
+      "vence": "2026-11-04",
+      "responsable_id": 1
+    },
+    {
+      "id": 2,
+      "legajo": "1002",
+      "tipo": "EQUIVALENCIA",
+      "prioridad": "MEDIA",
+      "estado": "PENDIENTE",
+      "descripcion": "Equivalencia de Matemática I",
+      "fecha": "2026-11-03",
+      "vence": "2026-11-18",
+      "responsable_id": 2
+    },
+    {
+      "id": 3,
+      "legajo": "1003",
+      "tipo": "REINCORPORACION",
+      "prioridad": "BAJA",
+      "estado": "PENDIENTE",
+      "descripcion": "Reincorporación a la carrera",
+      "fecha": "2026-11-04",
+      "vence": "2026-11-19",
+      "responsable_id": null
+    },
+    {
+      "id": 4,
+      "legajo": "1001",
+      "tipo": "CONSULTA",
+      "prioridad": "ALTA",
+      "estado": "RECHAZADA",
+      "descripcion": "Consulta sobre correlativas",
+      "fecha": "2026-11-05",
+      "vence": "2026-11-06",
+      "responsable_id": null
+    }
+  ]
+}

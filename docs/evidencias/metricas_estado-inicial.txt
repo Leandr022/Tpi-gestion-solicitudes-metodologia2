@@ -1,0 +1,82 @@
+# radon cc (complejidad ciclomática) — estado-inicial
+main.py
+    F 7:0 main - C (12)
+gestor.py
+    M 40:4 GestorSolicitudes.registrar_solicitud - D (23)
+    M 117:4 GestorSolicitudes.cambiar_estado - C (18)
+    M 151:4 GestorSolicitudes.asignar_responsable - C (16)
+    C 11:0 GestorSolicitudes - B (9)
+    M 228:4 GestorSolicitudes.reporte - B (9)
+    M 210:4 GestorSolicitudes.buscar - B (7)
+    M 13:4 GestorSolicitudes.cargar - B (6)
+    M 104:4 GestorSolicitudes.alta_responsable - A (5)
+    M 28:4 GestorSolicitudes.guardar - A (4)
+    M 182:4 GestorSolicitudes.buscar_por_tipo - A (3)
+    M 189:4 GestorSolicitudes.buscar_por_estado - A (3)
+    M 196:4 GestorSolicitudes.buscar_por_prioridad - A (3)
+    M 203:4 GestorSolicitudes.buscar_por_legajo - A (3)
+modelos.py
+    C 1:0 Estudiante - A (2)
+    C 8:0 Responsable - A (2)
+    C 15:0 Solicitud - A (2)
+    M 2:4 Estudiante.__init__ - A (1)
+    M 9:4 Responsable.__init__ - A (1)
+    M 16:4 Solicitud.__init__ - A (1)
+
+20 blocks (classes, functions, methods) analyzed.
+Average complexity: B (6.5)
+
+# radon mi (índice de mantenibilidad) — estado-inicial
+main.py - A (44.41)
+gestor.py - B (17.28)
+modelos.py - A (100.00)
+
+# radon raw — estado-inicial
+main.py
+    LOC: 69
+    LLOC: 56
+    SLOC: 56
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 13
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+gestor.py
+    LOC: 257
+    LLOC: 235
+    SLOC: 237
+    Comments: 4
+    Single comments: 4
+    Multi: 0
+    Blank: 16
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 2%
+        (C + M % L): 2%
+modelos.py
+    LOC: 25
+    LLOC: 21
+    SLOC: 21
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 4
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+** Total **
+    LOC: 351
+    LLOC: 312
+    SLOC: 314
+    Comments: 4
+    Single comments: 4
+    Multi: 0
+    Blank: 33
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 1%
+        (C + M % L): 1%

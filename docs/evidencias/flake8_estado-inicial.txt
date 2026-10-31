@@ -1,0 +1,15 @@
+# flake8 (--max-line-length=120) — estado-inicial
+gestor.py:20:9: E722 do not use bare 'except'
+gestor.py:25:121: E501 line too long (189 > 120 characters)
+gestor.py:69:13: E722 do not use bare 'except'
+gestor.py:97:121: E501 line too long (121 > 120 characters)
+gestor.py:100:121: E501 line too long (133 > 120 characters)
+gestor.py:203:38: E741 ambiguous variable name 'l'
+gestor.py:225:121: E501 line too long (142 > 120 characters)
+gestor.py:234:13: E722 do not use bare 'except'
+main.py:54:14: E712 comparison to False should be 'if cond is False:' or 'if not cond:'
+4     E501 line too long (189 > 120 characters)
+1     E712 comparison to False should be 'if cond is False:' or 'if not cond:'
+3     E722 do not use bare 'except'
+1     E741 ambiguous variable name 'l'
+exit=1
