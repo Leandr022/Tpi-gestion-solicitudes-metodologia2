@@ -29,26 +29,26 @@ solicitudes/modelos.py
     C 89:0 DatosSolicitud - C (13)
     M 99:4 DatosSolicitud.validar - C (12)
     M 166:4 Responsable.nuevo - A (5)
-    M 265:4 RegistroAcademico.contar_solicitudes_activas - A (5)
+    M 266:4 RegistroAcademico.contar_solicitudes_activas - A (5)
     C 118:0 CriteriosBusqueda - A (4)
     C 158:0 Responsable - A (4)
-    M 207:4 Solicitud.pasar_a - A (4)
+    M 208:4 Solicitud.pasar_a - A (4)
     M 125:4 CriteriosBusqueda.coincide_con - A (3)
     C 176:0 Solicitud - A (3)
-    M 215:4 Solicitud.asignar_a - A (3)
-    C 229:0 RegistroAcademico - A (3)
-    M 237:4 RegistroAcademico.buscar_solicitud - A (3)
-    M 240:4 RegistroAcademico.buscar_responsable - A (3)
-    M 243:4 RegistroAcademico.buscar_estudiante - A (3)
-    M 269:4 RegistroAcademico.filtrar - A (3)
-    M 272:4 RegistroAcademico.generar_reporte - A (3)
-    M 281:4 RegistroAcademico._contar_por - A (3)
+    M 216:4 Solicitud.asignar_a - A (3)
+    C 230:0 RegistroAcademico - A (3)
+    M 238:4 RegistroAcademico.buscar_solicitud - A (3)
+    M 241:4 RegistroAcademico.buscar_responsable - A (3)
+    M 244:4 RegistroAcademico.buscar_estudiante - A (3)
+    M 270:4 RegistroAcademico.filtrar - A (3)
+    M 273:4 RegistroAcademico.generar_reporte - A (3)
+    M 282:4 RegistroAcademico._contar_por - A (3)
     F 81:0 _valores - A (2)
     C 20:0 Tipo - A (2)
     C 31:0 Prioridad - A (2)
     C 40:0 Estado - A (2)
-    M 204:4 Solicitud.esta_vencida - A (2)
-    M 246:4 RegistroAcademico.obtener_o_crear_estudiante - A (2)
+    M 205:4 Solicitud.esta_vencida - A (2)
+    M 247:4 RegistroAcademico.obtener_o_crear_estudiante - A (2)
     M 27:4 Tipo.plazo_base_en_dias - A (1)
     M 36:4 Prioridad.ajustar_plazo - A (1)
     M 48:4 Estado.esta_activo - A (1)
@@ -59,10 +59,10 @@ solicitudes/modelos.py
     C 151:0 Estudiante - A (1)
     M 171:4 Responsable.tiene_capacidad - A (1)
     M 188:4 Solicitud.nueva - A (1)
-    M 197:4 Solicitud.calcular_plazo_en_dias - A (1)
-    M 201:4 Solicitud.esta_activa - A (1)
-    M 253:4 RegistroAcademico.agregar_solicitud - A (1)
-    M 259:4 RegistroAcademico.agregar_responsable - A (1)
+    M 198:4 Solicitud.calcular_plazo_en_dias - A (1)
+    M 202:4 Solicitud.esta_activa - A (1)
+    M 254:4 RegistroAcademico.agregar_solicitud - A (1)
+    M 260:4 RegistroAcademico.agregar_responsable - A (1)
 solicitudes/servicio.py
     M 85:4 ServicioSolicitudes._resolver_fecha - A (3)
     C 31:0 ServicioSolicitudes - A (2)
@@ -91,26 +91,26 @@ solicitudes/presentacion.py
 Average complexity: A (2.2)
 
 # radon mi (índice de mantenibilidad) — estado-refactorizado
-main.py - A (81.86)
+main.py - A (96.17)
 solicitudes/cli.py - A (49.15)
 solicitudes/errores.py - A (100.00)
 solicitudes/notificador.py - A (100.00)
 solicitudes/__init__.py - A (100.00)
 solicitudes/repositorio.py - A (68.41)
-solicitudes/modelos.py - A (33.60)
+solicitudes/modelos.py - A (33.56)
 solicitudes/servicio.py - A (50.22)
 solicitudes/presentacion.py - A (63.66)
 
 # radon raw (totales) — estado-refactorizado
 ** Total **
-    LOC: 643
-    LLOC: 473
-    SLOC: 463
-    Comments: 18
-    Single comments: 40
+    LOC: 647
+    LLOC: 476
+    SLOC: 465
+    Comments: 19
+    Single comments: 41
     Multi: 4
-    Blank: 136
+    Blank: 137
     - Comment Stats
         (C % L): 3%
         (C % S): 4%
-        (C + M % L): 3%
+        (C + M % L): 4%

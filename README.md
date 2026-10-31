@@ -99,7 +99,7 @@ git diff estado-inicial estado-refactorizado --stat
 |---|---|---|
 | Complejidad ciclomática promedio | 6,5 (B) | 2,2 (A) |
 | Método más complejo | 23 (D) | 12 (C, solo validación) |
-| Mantenibilidad del peor módulo | 17,28 (B) | 33,60 (A) |
+| Mantenibilidad del peor módulo | 17,28 (B) | 33,56 (A) |
 | Advertencias `flake8` | 9 | 0 |
 | Pruebas automatizadas | 0 | 173 (cobertura 100 % / 99 % ramas) |
 | Pérdida de datos ante `datos.json` corrupto | **Sí (silenciosa)** | No (se informa y se conserva) |

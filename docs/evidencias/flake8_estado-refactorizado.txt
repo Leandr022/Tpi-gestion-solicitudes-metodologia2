@@ -1,2 +1,2 @@
-# flake8 (--max-line-length=120) — estado-refactorizado
+# flake8 (--max-line-length=120) — estado-refactorizado (código y pruebas)
 exit=0

@@ -180,4 +180,4 @@ tests/unit/test_servicio.py::test_reporte_sin_fecha_usa_el_reloj_inyectado PASSE
 tests/unit/test_servicio.py::test_reporte_con_fecha_explicita_cuenta_vencidas PASSED [ 99%]
 tests/unit/test_servicio.py::test_reporte_con_fecha_invalida PASSED      [100%]
 
-============================= 173 passed in 9.04s ==============================
+============================= 173 passed in 9.10s ==============================
