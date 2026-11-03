@@ -117,5 +117,5 @@ git diff estado-inicial estado-refactorizado --stat
 
 ## Uso de inteligencia artificial
 
-Se utilizó Claude (Anthropic) como asistente técnico de apoyo. La declaración completa (herramienta, finalidad y
+Se utilizó Claude (Anthropic) como apoyo/tutoría y para chequear información y funcionalidad (con generación de borradores sujeta a revisión del estudiante). La declaración completa (herramienta, finalidad y
 grado de intervención) y la evidencia del intercambio están en [`docs/registro_uso_ia.md`](docs/registro_uso_ia.md).
