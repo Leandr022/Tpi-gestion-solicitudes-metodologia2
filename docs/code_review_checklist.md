@@ -2,8 +2,7 @@
 
 **Objeto de la revisión:** repositorio completo en el estado posterior a `etapa-pruebas` (commit 66208f5).
 **Herramientas de apoyo:** `flake8`, `radon`, `pytest`, `pytest-cov`, lectura manual del código y pruebas de mutación manual.
-**Revisor:** el autor del trabajo, con apoyo de IA (ver `docs/registro_uso_ia.md`). *El estudiante debe repasar cada ítem
-por sí mismo antes de entregar y ajustar el resultado a su propio criterio.*
+**Revisor:** el autor del trabajo, con apoyo de IA (ver `docs/registro_uso_ia.md`).
 
 Leyenda: ✔ cumple · ⚠ observación (con acción) · ✖ no cumple.
 

@@ -16,10 +16,10 @@ Fuente: `docs/evidencias/progresion_por_refactoring.txt` (herramientas `radon` y
 | R3 Move Method / Replace Conditional (bf731b8) | 3,0 (A) | 13 | 3 | 35,04 (`gestor.py`) | 413 | 50 de 50 |
 | R4 Extract Class / Replace Error Code (1f646f3) | 2,2 (A) | 13 | 2 | 33,60 (`modelos.py`) | 463 | 50 de 50 |
 
-*CC = complejidad ciclomática; SLOC = líneas de código fuente.* La CC máxima de 13 en R3/R4 corresponde a la
-clase `DatosSolicitud` (cadena de validaciones), no a lógica de negocio; se registra como mejora futura.
+*CC = complejidad ciclomática; SLOC = líneas de código fuente.* La columna de CC máxima cuenta bloques (clases y métodos): el 13 de R3/R4 corresponde a la
+clase `DatosSolicitud` y su método `validar` mide 12 (cadena de validaciones, no lógica de negocio); se registra como mejora futura. Los SLOC de R4 (463) corresponden al commit `1f646f3`; el estado final mide 465 por ajustes posteriores. Del mismo modo, la mantenibilidad de `modelos.py` en el commit `1f646f3` es 33,60 (`progresion_por_refactoring.txt`) y en el estado final 33,56 (`metricas_estado-refactorizado.txt`).
 
-**Costo del refactoring.** El código fuente creció de 314 a 463 SLOC (≈ +47 %): más archivos, docstrings y
+**Costo del refactoring.** El código fuente creció de 314 a 465 SLOC en el estado final (≈ +48 %): más archivos, docstrings y
 estructuras explícitas. El beneficio no está en tener menos líneas, sino en que cada una es más simple, está
 donde corresponde y puede probarse de forma aislada.
 
@@ -152,7 +152,7 @@ Los literales de cadena se reemplazaron por las enumeraciones `Tipo`, `Prioridad
 **Defecto detectado en la auto-revisión previa al commit:** la carga desde archivo dejaba `prioridad` como
 `str` en lugar de `Prioridad`. Las pruebas de caja negra no podían advertirlo (la salida era idéntica);
 se corrigió antes de confirmar.
-**Verificación:** 50/50 pruebas en verde. Demostración de OCP: ver §3.
+**Verificación:** 50/50 pruebas en verde. Demostración de OCP: ver Sección 6.
 
 ---
 
