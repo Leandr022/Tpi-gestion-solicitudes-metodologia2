@@ -1,0 +1,13 @@
+Registro de intercambio real con la IA (Claude, Anthropic) - TPI Metodología de Sistemas II
+Estudiante: Leandro Nahuel Santagada (Leg. 100129). Los mensajes del estudiante se transcriben textualmente; las respuestas de la IA se resumen.
+
+Fecha y hora: 8 de noviembre de 2026, 20:50 (hora de Buenos Aires)
+Tema: control final de entrega, sin modificar nada.
+
+PROMPT DEL ESTUDIANTE (textual):
+"Hacé el control final de entrega de mi TPI y devolvémelo como checklist con estado (OK, falta, dudoso).
+Verificá: (1) que el informe PDF tenga las 11 secciones del índice y los enlaces correctos al repositorio y al video; (2) que el repositorio tenga main, los 6 tags apuntando a los commits correctos, README y docs/; (3) que el anexo ZIP contenga evidencias/, diagramas/, docs/, tests/, código final y repositorio.bundle, y que el bundle se pueda clonar con git clone repositorio.bundle; (4) que evidencias/prompts_ia/ tenga todos los archivos que cita el Anexo A, con fechas y horas reales; (5) que la tabla del Anexo A tenga una fila por cada intercambio; (6) que no haya datos personales reales; (7) que las cifras clave del resumen ejecutivo coincidan con las del cuerpo.
+No modifiques nada. Para cada ítem en falta y en qué archivo."
+
+RESUMEN DE LA RESPUESTA DE LA IA:
+Trabajó sobre copias de solo lectura: clonó el remoto y el bundle, ejecutó las 173 pruebas y flake8, comparó el código, los docs y las cifras. Resultado: índice, cifras, datos personales y contenido del ZIP correctos; faltantes: remoto y bundle desactualizados respecto del informe, tags por mover, fecha u hora ausentes en los prompts 1, 2 y 7, enlaces del PDF no clicables, carpetas __pycache__ en el ZIP y tabla del Anexo A sin filas para varios intercambios. No pudo verificar el acceso al video (límite de consultas de YouTube). No modificó nada.

@@ -1,0 +1,12 @@
+Registro de intercambio real con la IA (Claude, Anthropic) - TPI Metodología de Sistemas II
+Estudiante: Leandro Nahuel Santagada (Leg. 100129). Los mensajes del estudiante se transcriben textualmente; las respuestas de la IA se resumen.
+
+Fecha y hora: 8 de noviembre de 2026, 20:40 (hora de Buenos Aires)
+Tema: verificación de la sección 3 del informe (sistema base) frente a los mínimos de la consigna y coherencia de cifras con otras secciones.
+
+PROMPT DEL ESTUDIANTE (textual):
+"Mi sistema base es el Sistema de Gestión de Solicitudes Académicas (Python, consola, datos.json). Revisá la sección 3 del informe y decime, requisito por requisito, si cumple los mínimos de la consigna: al menos 3 entidades (Estudiante, Responsable, Solicitud), al menos 4 operaciones verificables (tengo 6), persistencia (datos.json), versión inicial con problemas diagnosticables (10 code smells) y demostración de que la versión final conserva el comportamiento (50 pruebas de caracterización).
+Después comprobá que cada cifra de la sección 3 coincida con las de las secciones 4, 5, 7 y 8 (líneas de código, cantidad de pruebas, advertencias de flake8, complejidad). Listá cada discrepancia con página y cifra en conflicto. No corrijas ninguna cifra sin que yo la verifique contra docs/evidencias/."
+
+RESUMEN DE LA RESPUESTA DE LA IA:
+Confirmó los 5 mínimos de la consigna con evidencia (3 entidades, 6 operaciones, datos.json, 10 smells CS-01 a CS-10, 50 pruebas idénticas antes y después). Contrastó las cifras con docs/evidencias/: 351 líneas totales y 314 SLOC son medidas distintas de radon (no hay conflicto, pero conviene rotularlas); 9 advertencias de flake8 coincide (3 E722, 4 E501, 1 E741, 1 E712); 50 pruebas de caracterización y 173 en total coinciden; complejidad 23 y MI 17,28 coinciden; 463 y 465 SLOC corresponden al commit R4 y al estado final. No modificó ninguna cifra.

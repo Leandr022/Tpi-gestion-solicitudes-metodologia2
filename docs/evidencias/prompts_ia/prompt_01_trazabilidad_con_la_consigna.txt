@@ -1,0 +1,14 @@
+Registro de intercambio real con la IA (Claude, Anthropic) - TPI Metodología de Sistemas II
+Estudiante: Leandro Nahuel Santagada (Leg. 100129). Los mensajes del estudiante se transcriben textualmente; las respuestas de la IA se resumen.
+
+Fecha y hora: 8 de noviembre de 2026, 20:39 (hora de Buenos Aires)
+Tema: trazabilidad entre la consigna oficial y el informe.
+Adjuntos: TP_MS2V2.pdf (consigna) e Informe_TPI_MSII_Santagada.pdf (22 páginas).
+
+PROMPT DEL ESTUDIANTE (textual):
+"Te adjunto la consigna oficial del TPI de Metodología de Sistemas II y mi informe final de 22 páginas. El trabajo es individual y trata sobre un Sistema de Gestión de Solicitudes Académicas en Python.
+Quiero una tabla de trazabilidad en lenguaje académico con tres columnas: (1) requisito de la consigna (las 8 etapas, el formato de entrega y los criterios de la rúbrica), (2) sección y página del informe donde se cumple, (3) evidencia en el repositorio o en el anexo ZIP.
+Después, en una lista aparte, marcá todo requisito que no encuentres cumplido o que esté cumplido solo en parte. No completes nada por tu cuenta: si algo no está en el informe, decímelo. Recordá que la consigna permite la IA como apoyo/tutoría solo si se declara con evidencia, y que el video va con mi propia voz."
+
+RESUMEN DE LA RESPUESTA DE LA IA:
+Entregó la tabla de trazabilidad (8 etapas, entregables, requisitos del video y de IA, condiciones) con página y evidencia, y una lista de requisitos pendientes o parciales: el nombre del tag estadorefactorizado de la consigna frente a estado-refactorizado del repositorio; los archivos de prompts y el registro de IA que faltaban o estaban desactualizados en GitHub; los tags etapa-docs y estado-refactorizado en un commit anterior; el ZIP del anexo desactualizado; la revisión de código hecha por el mismo autor; la verificación de que el enlace del video sea accesible; y que el PDF adjunto era una versión anterior a las correcciones de consistencia.

@@ -1,0 +1,13 @@
+Registro de intercambio real con la IA (Claude, Anthropic) - TPI Metodología de Sistemas II
+Estudiante: Leandro Nahuel Santagada (Leg. 100129). Los mensajes del estudiante se transcriben textualmente; las respuestas de la IA se resumen.
+
+Fecha y hora: 8 de noviembre de 2026, 20:41 (hora de Buenos Aires)
+Tema: verificación del repositorio publicado en GitHub (solo lectura).
+
+PROMPT DEL ESTUDIANTE (textual):
+"Mi repositorio es https://github.com/Leandr022/Tpi-gestion-solicitudes-metodologia2. No hagas push ni cambies nada en el remoto sin que yo lo pida. Solo verificá y reportá.
+Comprobá: (1) que la rama por defecto sea main; (2) que existan los 6 tags exigidos (estado-inicial, etapa-diagnostico, etapa-refactoring, etapa-pruebas, etapa-docs, estado-refactorizado) y a qué commit apunta cada uno; el informe cita estado-inicial = a4f71fc, R1 = 2a228ea, R2 = 0549435, R3 = bf731b8, R4 = 1f646f3, etapa-pruebas = 66208f5; (3) que estado-refactorizado y etapa-docs apunten al commit final y no a uno anterior; (4) que README.md, docs/ y docs/evidencias/prompts_ia/ estén completos; (5) que en un clon limpio corran 173 pruebas en verde y flake8 sin advertencias.
+Para todo lo que falle, dame los comandos exactos de git que debo ejecutar yo mismo."
+
+RESUMEN DE LA RESPUESTA DE LA IA:
+Clonó el repositorio en un entorno temporal, sin modificar nada en el remoto. Resultado: rama por defecto main; los 6 tags existen y los commits citados (a4f71fc, 2a228ea, 0549435, bf731b8, 1f646f3, 66208f5) existen y coinciden; en un clon limpio corren 173 pruebas en verde y flake8 no da advertencias. Hallazgos a corregir: etapa-docs y estado-refactorizado apuntan a a7f41ea, no al último commit (el código es idéntico, cambia solo la documentación); docs/evidencias/prompts_ia/ está incompleto y registro_uso_ia.md está desactualizado. Entregó los comandos para que el estudiante los ejecutara.

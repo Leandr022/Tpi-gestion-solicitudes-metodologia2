@@ -1,0 +1,11 @@
+Registro de intercambio real con la IA (Claude, Anthropic) - TPI Metodología de Sistemas II
+Estudiante: Leandro Nahuel Santagada (Leg. 100129). Los mensajes del estudiante se transcriben textualmente; las respuestas de la IA se resumen.
+
+Fecha y hora: 8 de noviembre de 2026, 20:42 (hora de Buenos Aires)
+Tema: control de consistencia del informe contra docs/evidencias/.
+
+PROMPT DEL ESTUDIANTE (resumen fiel; el texto completo es el "Cuarto prompt" de la conversación):
+Pide verificar seis posibles inconsistencias del informe contra los archivos de docs/evidencias/, indicar el valor correcto y las páginas a corregir, dar el texto exacto actual y el propuesto, y no cambiar ninguna cifra que no esté respaldada por una salida real de herramienta.
+
+RESUMEN DE LA RESPUESTA DE LA IA:
+Contrastó cada punto con la evidencia y con el texto del PDF. Las seis correcciones ya estaban aplicadas en la última versión del informe (23 páginas); solo la versión anterior seguía mostrando 3.53125, la fecha vieja y las referencias cruzadas viejas. Además señaló dos puntos nuevos que no cambió sin confirmación: (a) la fila R4 de la tabla de progresión (33,60 en el commit R4) frente a 33,56 del estado final (metricas_estado-refactorizado.txt); (b) el criterio «ninguna función nueva supera CC 12» frente al bloque de clase DatosSolicitud con CC 13 (la CC máxima por función es 12).
